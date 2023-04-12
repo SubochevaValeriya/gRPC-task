@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "github.com/SubochevaValeriya/gRPC-task";
+
+message CompanyInfo {
+  int64 INN = 1;
+  int64 KPP = 2;
+  string name = 3;
+  string director = 4;
+}
+
+message Request {
+  int64 INN = 1;
+}
+
+message Response {
+  CompanyInfo companyInfo = 1;
+}
+
+service RusProfileService {
+  rpc DownloadThumbnail (Request) returns (Response);
+}
+//protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/rusprofile.proto
