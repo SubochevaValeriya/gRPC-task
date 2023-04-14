@@ -3,13 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/joho/godotenv"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	gRPC_task "rusprofile/proto"
@@ -24,17 +26,13 @@ func main() {
 		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
 
-	// environmental variables
-	if err := godotenv.Load(); err != nil {
-		logrus.Fatalf("error loading env variables: %s", err.Error())
-	}
-
 	logrus.Println("Starting Service...")
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%s", viper.GetString("host"), viper.GetString("port")))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
+	go runRest(viper.GetString("host"), viper.GetString("portRest"), viper.GetString("port"))
 	var opts []grpc.ServerOption
 	s := grpc.NewServer(opts...)
 
@@ -63,13 +61,29 @@ func main() {
 	logrus.Println("End of Program")
 }
 
+func runRest(host, portRest, portGRPC string) {
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	mux := runtime.NewServeMux()
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	err := gRPC_task.RegisterRusProfileServiceHandlerFromEndpoint(ctx, mux, fmt.Sprintf("%v:%v", host, portGRPC), opts)
+	if err != nil {
+		panic(err)
+	}
+	logrus.Printf("Server listening at 8081")
+	if err := http.ListenAndServe(fmt.Sprintf("%v:%v", host, portRest), mux); err != nil {
+		panic(err)
+	}
+}
+
 type server struct {
 	gRPC_task.RusProfileServiceServer
 }
 
 // initialization configs for app
 func initConfig() error {
-	viper.AddConfigPath("configs")
+	viper.AddConfigPath("./configs")
 	viper.SetConfigName("config")
 	return viper.ReadInConfig()
 }

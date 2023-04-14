@@ -2,7 +2,7 @@ package main
 
 import (
 	"errors"
-	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"golang.org/x/net/context"
 	gRPC_task "rusprofile/proto"
 	"testing"
@@ -16,9 +16,12 @@ type TestCaseGetInfo struct {
 
 func TestGetInfo(t *testing.T) {
 
-	if err := initConfig(); err != nil {
-		logrus.Fatalf("error initializing configs: %s", err.Error())
-	}
+	viper.AddConfigPath("./../configs")
+	viper.SetConfigName("config")
+
+	//if err := initConfig(); err != nil {
+	//	logrus.Fatalf("error initializing configs: %s", err.Error())
+	//}
 
 	s := server{}
 
