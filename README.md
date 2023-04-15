@@ -7,8 +7,8 @@ is a CLI tool & HTTP service (via grpc-gateway) to search company info on RusPro
 
 ```
 
-- client/client.go [flags] INNs (you can input several INNs divided by backspaces)
-- client/client.go [flags] file name.ext 
+- cmd/client/main.go [flags] INNs (you can input several INNs divided by backspaces)
+- cmd/client/main.go [flags] file name.ext 
 ```
 
 ### usage (grpc-gateway):
@@ -16,8 +16,8 @@ is a CLI tool & HTTP service (via grpc-gateway) to search company info on RusPro
 
 ### usage examples:
 ```
-go run client/client.go 5008042065
-go run client/client.go file companies.txt
+go run cmd/client/main.go 5008042065
+go run cmd/client/main.go file companies.txt
 ```
 
 ### commands:

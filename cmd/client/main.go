@@ -48,7 +48,7 @@ func startingServer() (*grpc.ClientConn, gRPC_task.RusProfileServiceClient) {
 
 	opts := grpc.WithTransportCredentials(insecure.NewCredentials())
 
-	cc, err := grpc.Dial(fmt.Sprintf("localhost:%s", viper.GetString("port")), opts)
+	cc, err := grpc.Dial(fmt.Sprintf("localhost:%s", viper.GetString("server.port")), opts)
 	if err != nil {
 		logrus.Fatalf("could not connect: %v", err)
 	}
