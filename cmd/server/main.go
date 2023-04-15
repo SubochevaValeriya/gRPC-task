@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
@@ -14,29 +13,29 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"rusprofile/internal/client/rusprofile"
 	gRPC_task "rusprofile/proto"
-	"rusprofile/server/internal"
 	"syscall"
 )
 
 func main() {
 	logrus.Println("Reading configs")
-
-	if err := initConfig(); err != nil {
+	config, err := parseConfig("./configs/config.yaml")
+	if err != nil {
 		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
 
 	logrus.Println("Starting Service...")
-	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%s", viper.GetString("host"), viper.GetString("port")))
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%s", config.Server.Host, config.Server.Port))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
-	go runRest(viper.GetString("host"), viper.GetString("portRest"), viper.GetString("port"))
+	go runRest(config.Server)
 	var opts []grpc.ServerOption
 	s := grpc.NewServer(opts...)
 
-	gRPC_task.RegisterRusProfileServiceServer(s, &server{})
+	gRPC_task.RegisterRusProfileServiceServer(s, &server{rusProfileClient: rusprofile.NewClient(config.Client.Rusprofile.Host, config.Client.Rusprofile.Timeout)})
 	reflection.Register(s)
 
 	logrus.Println("Service started.")
@@ -61,45 +60,35 @@ func main() {
 	logrus.Println("End of Program")
 }
 
-func runRest(host, portRest, portGRPC string) {
+func runRest(config serverConfig) {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	err := gRPC_task.RegisterRusProfileServiceHandlerFromEndpoint(ctx, mux, fmt.Sprintf("%v:%v", host, portGRPC), opts)
+	err := gRPC_task.RegisterRusProfileServiceHandlerFromEndpoint(ctx, mux, fmt.Sprintf("%v:%v", config.Host, config.Port), opts)
 	if err != nil {
 		panic(err)
 	}
-	logrus.Printf("Server listening at 8081")
-	if err := http.ListenAndServe(fmt.Sprintf(":%v", portRest), mux); err != nil {
+	logrus.Printf("Server listening at %v", config.PortRest)
+	if err := http.ListenAndServe(fmt.Sprintf(":%v", config.PortRest), mux); err != nil {
 		panic(err)
 	}
 }
 
 type server struct {
 	gRPC_task.RusProfileServiceServer
-}
-
-// initialization configs for app
-func initConfig() error {
-	viper.AddConfigPath("./configs")
-	viper.SetConfigName("config")
-	return viper.ReadInConfig()
+	rusProfileClient rusprofile.Client
 }
 
 // GetInfo searches for information about the company on the RusInfo site
 func (s *server) GetInfo(ctx context.Context, req *gRPC_task.Request) (*gRPC_task.Response, error) {
 	logrus.Printf("Request for INN: %v", req.INN)
-	_, err := internal.INNValidation(req.INN)
+
+	info, err := s.rusProfileClient.GetProfile(req.INN)
 	if err != nil {
-		logrus.Errorf("Invalid INN: %s", err)
-		return &gRPC_task.Response{CompanyInfo: nil}, err
-	}
-	info, err := internal.RusProfileParse(req.INN)
-	if err != nil {
-		logrus.Errorf("Info not found: %s", err)
-		return &gRPC_task.Response{CompanyInfo: nil}, err
+		logrus.Errorf("%s", err)
+		return nil, err
 	}
 
 	logrus.Printf("Info found for INN: %v", req.INN)

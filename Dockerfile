@@ -7,6 +7,6 @@ COPY ./ ./
 
 # build go app
 RUN go mod download
-RUN go build -o gRPC-task ./server/server.go
+RUN go build -o gRPC-task .cmd/server/main.go
 
 CMD ["./gRPC-task"]
