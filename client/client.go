@@ -82,7 +82,6 @@ func flagsAndCommands() ([]string, error) {
 // making request
 func getInfoRequest(client gRPC_task.RusProfileServiceClient, args []string, wg *sync.WaitGroup) {
 	var argI = 1
-
 	// URLs from file (command "file")
 	if args[argI] == "file" {
 		file, err := os.Open(args[argI+1])
