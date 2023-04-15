@@ -1,3 +1,8 @@
-host: "0.0.0.0"
-port: "8080"
-portRest: "8081"
+server:
+  host: "localhost"
+  port: "8080"
+  portRest: "8081"
+client:
+  rusprofile:
+    host: "www.rusprofile.ru"
+    timeout: "1s"
