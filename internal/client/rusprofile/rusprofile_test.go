@@ -1,6 +1,7 @@
 package rusprofile
 
 import (
+	"context"
 	"github.com/stretchr/testify/assert"
 	gRPC_task "rusprofile/proto"
 	"testing"
@@ -44,7 +45,7 @@ func TestRusProfileParse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := client.GetProfile(tt.args.INN)
+			got, err := client.GetProfile(context.Background(), tt.args.INN)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("RusProfileParse() error = %v, wantErr %v", err, tt.wantErr)
 				return

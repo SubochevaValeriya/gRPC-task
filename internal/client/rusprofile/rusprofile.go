@@ -1,6 +1,7 @@
 package rusprofile
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
@@ -11,7 +12,7 @@ import (
 )
 
 type Client interface {
-	GetProfile(INN int64) (gRPC_task.CompanyInfo, error)
+	GetProfile(ctx context.Context, INN int64) (gRPC_task.CompanyInfo, error)
 }
 
 type client struct {
@@ -30,12 +31,16 @@ func NewClient(addr string, timeout time.Duration) Client {
 var notINNError = errors.New("incorrect format for INN")
 var companyNotFoundError = errors.New("company not found")
 
-func (c client) GetProfile(INN int64) (gRPC_task.CompanyInfo, error) {
+func (c client) GetProfile(ctx context.Context, INN int64) (gRPC_task.CompanyInfo, error) {
 	if !(INN >= 1000000000 && INN <= 9999999999) {
 		return gRPC_task.CompanyInfo{}, notINNError
 	}
 
-	res, err := c.httpClient.Get(fmt.Sprintf("https://%v/search?query=%v", c.addr, INN))
+	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("https://%v/search?query=%v", c.addr, INN), nil)
+	if err != nil {
+		return gRPC_task.CompanyInfo{}, err
+	}
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return gRPC_task.CompanyInfo{}, err
 	}

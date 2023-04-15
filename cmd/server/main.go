@@ -85,7 +85,7 @@ type server struct {
 func (s *server) GetInfo(ctx context.Context, req *gRPC_task.Request) (*gRPC_task.Response, error) {
 	logrus.Printf("Request for INN: %v", req.INN)
 
-	info, err := s.rusProfileClient.GetProfile(req.INN)
+	info, err := s.rusProfileClient.GetProfile(ctx, req.INN)
 	if err != nil {
 		logrus.Errorf("%s", err)
 		return nil, err
