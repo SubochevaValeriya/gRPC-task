@@ -72,7 +72,7 @@ func runRest(host, portRest, portGRPC string) {
 		panic(err)
 	}
 	logrus.Printf("Server listening at 8081")
-	if err := http.ListenAndServe(fmt.Sprintf("%v:%v", host, portRest), mux); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%v", portRest), mux); err != nil {
 		panic(err)
 	}
 }
