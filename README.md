@@ -4,7 +4,7 @@ is a CLI tool & HTTP service (via grpc-gateway) to search company info on RusPro
 
 
 ### usage (grpc):
-![Image alt](https://github.com/SubochevaValeriya/gRPC-task-/blob/dev/server/tools/logo/grpc.png)
+![Image alt](https://github.com/SubochevaValeriya/gRPC-task/blob/dev/server/tools/logo/grpc.png)
 
 ```
 
@@ -13,7 +13,7 @@ is a CLI tool & HTTP service (via grpc-gateway) to search company info on RusPro
 ```
 
 ### usage (grpc-gateway):
-![Image alt](https://github.com/SubochevaValeriya/gRPC-task-/blob/dev/server/tools/logo/http.png)
+![Image alt](https://github.com/SubochevaValeriya/gRPC-task/blob/dev/server/tools/logo/http.png)
 
 ### usage examples:
 ```
