@@ -2,7 +2,6 @@
 
 is a CLI tool & HTTP service (via grpc-gateway) to search company info on RusProfile by company INN
 
-
 ### usage (grpc):
 ![Image alt](https://github.com/SubochevaValeriya/gRPC-task/blob/dev/server/tools/logo/grpc.png)
 
